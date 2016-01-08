@@ -60,7 +60,6 @@
   (define current-transaction (transaction (string->number amount)
                                            category
                                            (generate-timestamp)))
-  
   (cons current-transaction transactions))
 
 (define (load-transactions)
@@ -96,11 +95,12 @@
             (foldl + 0 amounts))))
 
 (define (list-transactions ts)
-  (define (calc-tabs cat)
-    (cond
-     [(> (string-length cat) 8) "\t"]
-     [else "\t\t"]))
-  
+  (define (calc-tabs category)
+    (build-string (- 3
+                     (quotient (string-length category)
+                               8))
+                  (lambda (x) #\tab)))
+
   (printf "Amt\tCategory\t\tTimestamp~n")
   (for-each
    (lambda (t)
@@ -114,18 +114,18 @@
 
 (define (remove-transaction timestamp transactions [new '()])
   (cond
-   [(null? transactions) (reverse new)]
-   [(equal? (transaction-timestamp (first transactions))
-            timestamp)
-    (remove-transaction timestamp
-                        (rest transactions)
-                        new)]
-   [else
-    (remove-transaction timestamp
-                        (rest transactions)
-                        (cons (first transactions)
-                              new))]))
-      
+    [(null? transactions) (reverse new)]
+    [(equal? (transaction-timestamp (first transactions))
+             timestamp)
+     (remove-transaction timestamp
+                         (rest transactions)
+                         new)]
+    [else
+     (remove-transaction timestamp
+                         (rest transactions)
+                         (cons (first transactions)
+                               new))]))
+
 (define (add-transaction-sequence/interactive old-ts)
   (write-transactions
    (consolidate-transactions
